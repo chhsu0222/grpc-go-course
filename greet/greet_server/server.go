@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net"
 
@@ -8,7 +9,17 @@ import (
 	"google.golang.org/grpc"
 )
 
-type sever struct{}
+type server struct{}
+
+func (*server) Greet(ctx context.Context, req *greetpb.GreetRequest) (*greetpb.GreetResponse, error) {
+	firstName := req.GetGreeting().GetFirstName()
+	result := "Hello " + firstName
+	res := &greetpb.GreetResponse{
+		Result: result,
+	}
+
+	return res, nil
+}
 
 func main() {
 	lis, err := net.Listen("tcp", "0.0.0.0:50051")
@@ -17,7 +28,7 @@ func main() {
 	}
 
 	s := grpc.NewServer()
-	greetpb.RegisterGreetServiceServer(s, &sever{})
+	greetpb.RegisterGreetServiceServer(s, &server{})
 
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("Failed to serve: %v", err)
