@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 
@@ -10,7 +11,7 @@ import (
 
 func main() {
 	// Create a gRPC channel to communicate with the server
-	cc, err := grpc.Dial("localhos:50051", grpc.WithInsecure())
+	cc, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("Couldn't connect: %v", err)
 	}
@@ -19,5 +20,22 @@ func main() {
 
 	// Create a client stub to perform RPCs
 	c := greetpb.NewGreetServiceClient(cc)
-	fmt.Printf("Created client: %f", c)
+	// fmt.Printf("Created client: %f", c)
+
+	doUnary(c)
+}
+
+func doUnary(c greetpb.GreetServiceClient) {
+	fmt.Println("Start to do a Unary RPC...")
+	req := &greetpb.GreetRequest{
+		Greeting: &greetpb.Greeting{
+			FirstName: "CH",
+			LastName:  "Hsu",
+		},
+	}
+	res, err := c.Greet(context.Background(), req)
+	if err != nil {
+		log.Fatalf("error while calling Greet RPC: %v", err)
+	}
+	log.Printf("Response from Greet: %v", res.GetResult())
 }
