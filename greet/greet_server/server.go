@@ -92,6 +92,10 @@ func (*server) GreetEveryone(stream greetpb.GreetService_GreetEveryoneServer) er
 func (*server) GreetWithDeadline(ctx context.Context, req *greetpb.GreetWithDeadlineRequest) (*greetpb.GreetWithDeadlineResponse, error) {
 	fmt.Printf("GreetWithDeadline function was invoked with %v\n", req)
 	for i := 0; i < 3; i++ {
+		if ctx.Err() == context.DeadlineExceeded {
+			fmt.Println("The deadline exceeded!")
+			return nil, status.Error(codes.DeadlineExceeded, "The deadline exceeded")
+		}
 		if ctx.Err() == context.Canceled {
 			// The client canceled the request
 			fmt.Println("The client canceled the request!")
